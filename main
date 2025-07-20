@@ -1,0 +1,34 @@
+import pandas as pd 
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.neighbors import KNeighborsClassifier
+a = pd.read_csv('a.csv')
+b=a.copy(deep=True)
+x=['name','album','release_date','id','uri','duration_ms','release_date']
+matrix = euclidean_distances(b.drop(x,axis=1)) 
+k=3 
+knn= KNeighborsClassifier(n_neighbors=k)
+knn.fit(b.drop(x,axis=1),b['name'])
+def fn(name, b, matrix, k=3 ):
+  try:
+    target_song_index = b[b['name'] == name].index.tolist()
+  except KeyError:
+    print(f"Song '{name}' not found in data.")
+    return []
+
+  if not target_song_index:
+    return []
+
+  nearest_neighbors = matrix[target_song_index[0]].argsort()[1:k+1]  
+
+  recommended_songs = b.loc[nearest_neighbors, 'name'].tolist()
+
+  return recommended_songs
+while True:
+  target_song_name = input("song sample ")
+
+  recommendations = fn(target_song_name, b, matrix)
+
+  print(f"target song '{target_song_name}':")
+  for song in recommendations:
+    print(song)
